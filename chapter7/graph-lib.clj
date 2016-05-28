@@ -6,6 +6,12 @@
 
 (def *max-label-length* 30)
 
+(def *nodes* ["living-room","garden","attic"])
+
+(def *wizard-nodes* (zipmap *nodes* ["you are in the living-room. a wizard is snoring loudly on the couch" "you are in a beautiful garden. there is a well in front of you" "you are in the attic. there is a giant welding torch in the corner."]))
+
+(def *wizard-edges* (zipmap *nodes* [[["garden" "west" "door"] ["attic" "upstairs" "ladder"]] [["living-room" "east" "door"]] [["living-room" "downstairs" "ladder"]]]))
+
 (defn dot-name
   [exp]
   (s/replace exp #"[^0-9^a-z^A-Z]" "-"))
@@ -24,4 +30,33 @@
 
 
 
-(dot-label "alpha gaama est mucho lasto" )
+(defn nodes->dot
+  [nodes]
+  (map (fn [node]
+         (str
+         (dot-name (first node))
+         "[label=\""
+         (dot-label (second node))
+         "\"];"
+         )) nodes))
+
+
+(defn edges->dot
+  [edges]
+  (let [node-names (keys edges)]
+    (map (fn [node]
+           (map
+            (fn [edge]
+              (str
+                (dot-name (node))
+                  "->"
+                  (dot-name (first edge))
+                  "[label=\"" 
+                  (dot-label (rest edge))
+                  "\"];"
+            )) (edges node))
+       node-names)
+    )))
+
+(edges->dot *wizard-edges* )
+*wizard-edges*
