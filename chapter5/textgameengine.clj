@@ -14,10 +14,10 @@
 
 (def *objects* ["whiskey" "bucket" "frog" "chain"])
 
-(def ^:dynamic *object-locations* (zipmap *objects* ["living-room"
-                                           "living-room"
-                                           "garden"
-                                           "garden"]))
+(def *object-locations* (atom (zipmap *objects* ["living-room"
+                                             "living-room"
+                                              "garden"
+                                              "garden"])))
 
 (defn describe-location [location nodes]
   (nodes location))
@@ -43,7 +43,7 @@
   (println (apply str
     (interleave [(describe-location location *nodes*)
                  (describe-paths location *edges*)
-                 (describe-objects location *objects* *object-locations*)]
+                 (describe-objects location *objects* @*object-locations*)]
                  (repeat "\n")))))
 
 
@@ -61,6 +61,15 @@
 
 ;; the non-mutative part of this will eventually make
 ;; this complicated in the next chapter yay!!!
+;; have to come to this to examine why
+;; if () evaluates to true
+;; but (true? ()) evaluates to false 
 (defn pickup [location object]
-  (if (objects-at location *objects* *object-locations*)))
-(walk  "living-room" "west")
+  (if (seq (filter #(= object %) (objects-at location *objects* @*object-locations*)))
+    (do
+      (swap! *object-locations* assoc object "body")
+      (println (str "you are now carrying the " object)))
+    (println "you cannot get that")))
+
+(look "garden")
+(pickup  "garden" "frog")
