@@ -1,3 +1,5 @@
+(ns chapter5.temtgameengine)
+
 (def nodes ["living-room" "garden" "attic"])
 
 (def *nodes* (zipmap
@@ -71,5 +73,17 @@
       (println (str "you are now carrying the " object)))
     (println "you cannot get that")))
 
-(look "garden")
-(pickup  "garden" "frog")
+
+(defn inventory []
+  (println "inventory :" (apply str (-> "body"
+                                        (objects-at  *objects* @*object-locations*)
+                                        (interleave (repeat " , "))
+                                        (butlast)))))
+
+
+;; just for tests
+;; move along .. move along
+;; (look "garden")
+;; (pickup  "garden" "frog")
+;; (pickup  "garden" "chain")
+;; (inventory)
