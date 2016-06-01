@@ -1,4 +1,5 @@
 (require '[clojure.string :as s])
+(require '[clojure.java.shell :as shell])
 
 ;; write to a file
 ;; (spit "something.txt" "hello world")
@@ -14,7 +15,7 @@
 
 (defn dot-name
   [exp]
-  (s/replace exp #"[^0-9^a-z^A-Z]" "-"))
+  (s/replace exp #"[^0-9^a-z^A-Z]" "_"))
 
 ;; put in explanation for breaking every good practice
 ;; for clojure code, have to make this prettier in the
@@ -36,7 +37,7 @@
          (str
          (dot-name (first node))
          "[label=\""
-         (dot-label (second node))
+         (dot-label (s/join " => " node))
          "\"];"
          )) nodes))
 
@@ -44,19 +45,36 @@
 (defn edges->dot
   [edges]
   (let [node-names (keys edges)]
-    (map (fn [node]
+    (flatten
+      (map (fn [node]
            (map
             (fn [edge]
               (str
-                (dot-name (node))
+                  (dot-name node)
                   "->"
                   (dot-name (first edge))
                   "[label=\"" 
-                  (dot-label (rest edge))
+                  (dot-label (s/join " " (rest edge)))
                   "\"];"
-            )) (edges node))
-       node-names)
-    )))
+            )) (edges node)))
+       node-names
+    ))))
 
-(edges->dot *wizard-edges* )
-*wizard-edges*
+(defn graph->dot
+  [nodes edges]
+  (str
+   "digraph{"
+   (s/join "\n" (nodes->dot nodes))
+   (s/join "\n" (edges->dot edges))
+   "}")
+  )
+
+(defn graph->png
+ [fname nodes edges]
+ (do
+   (spit fname (graph->dot nodes edges))
+   (shell/sh "dot" "-Tpng" "-O" fname)))
+
+
+
+(graph->png "wizard" *wizard-nodes* *wizard-edges*)
