@@ -1,5 +1,3 @@
-(ns chapter5.temtgameengine)
-
 (def nodes ["living-room" "garden" "attic"])
 
 (def *nodes* (zipmap
