@@ -19,6 +19,8 @@
                                               "garden"
                                               "garden"])))
 
+(def *location* (atom "living-room"))
+
 (defn describe-location [location nodes]
   (nodes location))
 
@@ -39,41 +41,33 @@
   (let [describe-obj #(str " you see a " % " on the floor.")]
     (apply str (map describe-obj (objects-at loc objs obj-locs)))))
 
-(defn look [location]
-  (println (apply str
-    (interleave [(describe-location location *nodes*)
-                 (describe-paths location *edges*)
-                 (describe-objects location *objects* @*object-locations*)]
-                 (repeat "\n")))))
+(defn look []
+   (apply str
+    (interleave [(describe-location @*location* *nodes*)
+                 (describe-paths @*location* *edges*)
+                 (describe-objects @*location* *objects* @*object-locations*)]
+                 (repeat "\n"))))
 
-
-;; the following function deviates
-;; from the book in the sense that this
-;; function does not modify any global state
-;; (probably need to refactor this)
-(defn walk [location direction]
-  (let [next (first (filter #(= (% 1) direction) (*edges* location)))]
+(defn walk [direction]
+  (let [next (first (filter #(= (% 1) direction) (*edges* @*location*)))]
     (if next
       (do
-        (look (next 0))
-        (next 0))
-      (println "you cannot go that way"))))
+        (reset! *location* (next 0))
+        (look))
+      "you cannot go that way")))
 
-;; the non-mutative part of this will eventually make
-;; this complicated in the next chapter yay!!!
-;; have to come to this to examine why
 ;; if () evaluates to true
 ;; but (true? ()) evaluates to false 
-(defn pickup [location object]
-  (if (seq (filter #(= object %) (objects-at location *objects* @*object-locations*)))
+(defn pickup [object]
+  (if (seq (filter #(= object %) (objects-at @*location* *objects* @*object-locations*)))
     (do
       (swap! *object-locations* assoc object "body")
-      (println (str "you are now carrying the " object)))
-    (println "you cannot get that")))
+      (str "you are now carrying the " object))
+    (str "you cannot get that")))
 
 
 (defn inventory []
-  (println "inventory :" (apply str (-> "body"
+  (str "inventory :" (apply str (-> "body"
                                         (objects-at  *objects* @*object-locations*)
                                         (interleave (repeat " , "))
                                         (butlast)))))
