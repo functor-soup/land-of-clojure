@@ -1,5 +1,6 @@
 (require '[clojure.string :as s])
 (require '[clojure.java.shell :as shell])
+(require '[clojure.set :as set])
 
 ;; write to a file
 ;; (spit "something.txt" "hello world")
@@ -77,4 +78,52 @@
 
 
 
-(graph->png "wizard" *wizard-nodes* *wizard-edges*)
+;;(graph->png "wizard" *wizard-nodes* *wizard-edges*)
+
+
+(defn maplist
+  [x]
+  (if-not (seq x)
+    []
+    (cons (seq x) (maplist (rest x)))))
+
+
+(defn uedges->dot
+  [edges]
+  (let [node-names (keys edges)
+        ml-node-names (maplist node-names)
+        get-conn-nodes-names (fn [node]
+                              (map #(first %)(edges node)))]
+    (remove nil?
+     (flatten
+      (map (fn [node]
+             (let [node-name (first node)
+                   conn-nodes (get-conn-nodes-names node-name)
+                   exc (seq (set/difference  (set conn-nodes) (set (rest node))))]
+               (when exc
+                 (map (fn [x]
+                        (str
+                         (dot-name node-name)
+                         "--"
+                         (dot-name x)
+                         "[label=\"" 
+                         (dot-label (s/join " " (rest ((edges node-name) 0))))
+                         "\"];"
+                         )) exc)))) ml-node-names)))))
+
+
+(defn ugraph->dot
+  [nodes edges]
+  (str
+   "graph{"
+   (s/join "\n" (nodes->dot nodes))
+   "\n"
+   (s/join "\n" (uedges->dot edges))
+   "}")
+  )
+
+(defn ugraph->png
+  [fname nodes edges]
+  (do
+    (spit fname (ugraph->dot nodes edges))
+    (shell/sh "dot" "-Tpng" "-O" fname)))
