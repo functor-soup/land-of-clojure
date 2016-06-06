@@ -8,11 +8,11 @@
 
 (def *max-label-length* 30)
 
-(def *nodes* ["living-room","garden","attic"])
+(def *nodes* ["living-room","garden","attic","test-node"])
 
-(def *wizard-nodes* (zipmap *nodes* ["you are in the living-room. a wizard is snoring loudly on the couch" "you are in a beautiful garden. there is a well in front of you" "you are in the attic. there is a giant welding torch in the corner."]))
+(def *wizard-nodes* (zipmap *nodes* ["you are in the living-room. a wizard is snoring loudly on the couch" "you are in a beautiful garden. there is a well in front of you" "you are in the attic. there is a giant welding torch in the corner." "test-node"]))
 
-(def *wizard-edges* (zipmap *nodes* [[["garden" "west" "door"] ["attic" "upstairs" "ladder"]] [["living-room" "east" "door"]] [["living-room" "downstairs" "ladder"]]]))
+(def *wizard-edges* (zipmap *nodes* [{"garden" ["west" "door"] "attic" ["upstairs" "ladder"]} {"living-room" ["east" "door"] "test-node" ["x1" "y1"]} {"living-room" ["downstairs" "ladder"] "test-node" ["x2" "y2"]} { "attic" ["1x" "1y"] "garden" ["2x" "2y"]}]))
 
 (defn dot-name
   [exp]
@@ -93,7 +93,7 @@
   (let [node-names (keys edges)
         ml-node-names (maplist node-names)
         get-conn-nodes-names (fn [node]
-                              (map #(first %)(edges node)))]
+                              (keys (edges node)))]
     (remove nil?
      (flatten
       (map (fn [node]
@@ -107,7 +107,7 @@
                          "--"
                          (dot-name x)
                          "[label=\"" 
-                         (dot-label (s/join " " (rest ((edges node-name) 0))))
+                         (dot-label (s/join " " (get-in edges [node-name x])))
                          "\"];"
                          )) exc)))) ml-node-names)))))
 
