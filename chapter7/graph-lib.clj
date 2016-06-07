@@ -50,12 +50,12 @@
       (map (fn [node]
            (map
             (fn [edge]
-              (str
+                (str
                   (dot-name node)
                   "->"
                   (dot-name (first edge))
                   "[label=\"" 
-                  (dot-label (s/join " " (rest edge)))
+                  (dot-label (s/join " " (second edge)))
                   "\"];"
             )) (edges node)))
        node-names
