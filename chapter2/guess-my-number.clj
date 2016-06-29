@@ -20,20 +20,16 @@
 ;; recursive repl
 ;; why recursive? because global state is garbage
 
-(defn repl-kinda-meh
+(defn repl-machine
   [small big]
-   (do
-      (println " Is this( your number? " (guess-my-number small big))
-      (let [yayinput (read-line)]
-        (cond
-          (= yayinput "greater") (recur (bigger small big) big)
-          (= yayinput "smaller")  (recur small (smaller small big))
-          (= yayinput "yes") (guess-my-number small big)
-          :else (do
-                  (println "Command not recognised")
-                  (recur small big))
-          )
-        )))
+    (println " Is this your number? " (guess-my-number small big))
+    (let [input (read-line)]
+      (case input
+        "greater" (recur (bigger small big) big)
+        "smaller" (recur small (smaller small big))
+        "yes"     (guess-my-number small big)
+        (do (println "Command not recognised")
+            (recur small big))
+      )))
 
-(defn play-game []
-   (repl-kinda-meh 1 100))
+(defn play-game [] (repl-machine 1 100))
