@@ -1,4 +1,4 @@
-![Image of something] (https://raw.githubusercontent.com/nerorevenge/land-of-clojure/master/img.png)
+![Image of something] (https://raw.githubusercontent.com/functor-soup/land-of-clojure/master/img.png)
 
 #Unofficial Translation of Common lisp code from Conrad Barski's Land of Lisp Book, into Clojure
 
